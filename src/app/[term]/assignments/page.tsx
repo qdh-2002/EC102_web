@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getItems, getTerm, viewer } from "@/lib/queries";
 import { termName } from "@/lib/terms";
+import { FEATURES } from "@/lib/constants";
 import { ItemCard } from "@/components/ItemCard";
 import { EmptyState, PageHeader } from "@/components/SiteShell";
 import { IconExternal, IconSigma } from "@/components/icons";
@@ -10,7 +11,7 @@ export const metadata = { title: "Homework & exams" };
 
 export default async function AssignmentsPage({ params }: { params: Promise<{ term: string }> }) {
   const term = await getTerm((await params).term);
-  if (!term) notFound();
+  if (!term || !FEATURES.homeworkAndExams) notFound();
   const [items, { isStaff }] = await Promise.all([getItems(term.id, ["HOMEWORK", "EXAM", "REVIEW"]), viewer()]);
   const homework = items.filter((i) => i.kind === "HOMEWORK").sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
   const exams = items.filter((i) => i.kind === "EXAM");

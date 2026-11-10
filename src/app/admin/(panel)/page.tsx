@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { pickTerm } from "@/lib/admin-data";
 import { currentWeek, termName, weekLabel } from "@/lib/terms";
 import { formatDateTime } from "@/lib/dates";
-import { ITEM_KIND_LABEL, type ItemKind } from "@/lib/constants";
+import { ENABLED_KINDS, ITEM_KIND_LABEL, type ItemKind } from "@/lib/constants";
 import { Flash } from "@/components/admin/fields";
 import { ConfirmButton } from "@/components/admin/ui";
 import { deleteSampleContentAction } from "../actions";
@@ -29,7 +29,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     );
   }
   const [items, logs, sampleCount] = await Promise.all([
-    prisma.item.findMany({ where: { termId: term.id }, include: { resources: true } }),
+    prisma.item.findMany({ where: { termId: term.id, kind: { in: [...ENABLED_KINDS] } }, include: { resources: true } }),
     prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { user: true } }),
     prisma.item.count({ where: { isPlaceholder: true } }).then(async (n) => n + (await prisma.resource.count({ where: { isPlaceholder: true } }))),
   ]);
@@ -62,15 +62,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           </Link>
           <Link href={`/admin/items/new?term=${term.id}&kind=DISCUSSION`} className="btn-secondary">
             + Discussion
-          </Link>
-          <Link href={`/admin/items/new?term=${term.id}&kind=HOMEWORK`} className="btn-secondary">
-            + Homework
-          </Link>
-          <Link href={`/admin/items/new?term=${term.id}&kind=EXAM`} className="btn-secondary">
-            + Exam
-          </Link>
-          <Link href="/admin/announcements" className="btn-gold">
-            Post announcement
           </Link>
         </div>
       </div>

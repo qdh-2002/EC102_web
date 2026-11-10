@@ -5,6 +5,7 @@ import { prisma } from "./db";
 import { compareTermsDesc } from "./terms";
 import { getStaff } from "./auth";
 import { hasRecording } from "./access";
+import { ENABLED_KINDS } from "./constants";
 
 export const itemInclude = {
   resources: { orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] },
@@ -24,7 +25,8 @@ function termWhere(isStaff: boolean): Prisma.TermWhereInput {
 
 function itemWhere(isStaff: boolean): Prisma.ItemWhereInput {
   // Staff preview drafts on the public pages (they are badged); students only see published.
-  return isStaff ? { status: { not: "ARCHIVED" } } : { status: "PUBLISHED" };
+  const kind = { kind: { in: [...ENABLED_KINDS] } };
+  return isStaff ? { status: { not: "ARCHIVED" }, ...kind } : { status: "PUBLISHED", ...kind };
 }
 
 export const listTerms = cache(async () => {

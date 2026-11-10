@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Term, Week } from "@prisma/client";
-import { COURSE } from "@/lib/constants";
+import { COURSE, FEATURES } from "@/lib/constants";
 import { currentWeek, instructorNames, parseQuickLinks, termName, totalWeeks, weekLabel } from "@/lib/terms";
 import { prisma } from "@/lib/db";
 import { listTerms, viewer, getCurrentTerm } from "@/lib/queries";
@@ -24,7 +24,7 @@ export async function SiteShell({ term, children }: { term: Term | null; childre
         { href: term.isCurrent ? "/" : base, label: "Home", icon: "home", exact: true },
         { href: `${base}/lectures`, label: "Lectures", icon: "lectures" },
         { href: `${base}/discussions`, label: "Discussions", icon: "discussions" },
-        { href: `${base}/assignments`, label: "Homework & Exams", icon: "assignments" },
+        ...(FEATURES.homeworkAndExams ? [{ href: `${base}/assignments`, label: "Homework & Exams", icon: "assignments" } as NavItem] : []),
         { href: `${base}/schedule`, label: "Course calendar", icon: "schedule" },
         { href: "/search", label: "Search", icon: "search" },
         { href: "/archive", label: "All terms & archive", icon: "archive" },

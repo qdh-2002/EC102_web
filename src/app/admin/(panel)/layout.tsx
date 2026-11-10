@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireStaff } from "@/lib/auth";
 import { logoutAction } from "../actions";
-import { COURSE, ROLE_LABEL } from "@/lib/constants";
+import { COURSE, FEATURES, ROLE_LABEL } from "@/lib/constants";
 import { AdminNav } from "@/components/admin/AdminNav";
 
 export const dynamic = "force-dynamic";
@@ -11,8 +11,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const me = await requireStaff();
   const links = [
     { href: "/admin", label: "Dashboard", exact: true },
-    { href: "/admin/items", label: "Course content" },
-    { href: "/admin/announcements", label: "Announcements" },
+    { href: "/admin/items", label: "Lectures & discussions" },
+    ...(FEATURES.announcements ? [{ href: "/admin/announcements", label: "Announcements" }] : []),
     { href: "/admin/terms", label: "Terms" },
     ...(me.role === "ADMIN" ? [{ href: "/admin/users", label: "Staff accounts" }] : []),
     { href: "/admin/activity", label: "Activity log" },

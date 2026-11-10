@@ -1,6 +1,6 @@
 import type { Resource } from "@prisma/client";
 import { addResourceAction, deleteResourceAction, updateResourceAction } from "@/app/admin/actions";
-import { ACCESS_LABEL, ACCESS_LEVELS, RESOURCE_TYPE_LABEL, RESOURCE_TYPES } from "@/lib/constants";
+import { ACCESS_LABEL, ACCESS_LEVELS, RESOURCE_TYPE_LABEL, ENABLED_RESOURCE_TYPES } from "@/lib/constants";
 import { formatDateTime, toCampusInput } from "@/lib/dates";
 import { formatBytes } from "@/lib/format";
 import { RESOURCE_STYLE } from "../resource-style";
@@ -8,7 +8,7 @@ import type { ResourceType } from "@/lib/constants";
 import { Field, Select } from "./fields";
 import { ConfirmButton, SubmitButton } from "./ui";
 
-const typeOptions = RESOURCE_TYPES.map((t) => ({ value: t, label: RESOURCE_TYPE_LABEL[t] }));
+const typeOptions = ENABLED_RESOURCE_TYPES.map((t) => ({ value: t, label: RESOURCE_TYPE_LABEL[t] }));
 const accessOptions = ACCESS_LEVELS.map((a) => ({ value: a, label: ACCESS_LABEL[a] }));
 
 function ResourceFields({ r, prefix }: { r?: Resource; prefix: string }) {
@@ -16,25 +16,25 @@ function ResourceFields({ r, prefix }: { r?: Resource; prefix: string }) {
     <>
       <div className="grid gap-3 sm:grid-cols-[160px_1fr]">
         <Field label="Type" htmlFor={`${prefix}-type`}>
-          <Select id={`${prefix}-type`} name="type" defaultValue={r?.type ?? "SLIDES"} options={typeOptions} />
+          <Select id={`${prefix}-type`} name="type" defaultValue={r?.type ?? "SLIDES"} options={r && !typeOptions.some((o) => o.value === r.type) ? [...typeOptions, { value: r.type, label: RESOURCE_TYPE_LABEL[r.type as ResourceType] ?? r.type }] : typeOptions} />
         </Field>
         <Field label="Label" htmlFor={`${prefix}-label`}>
           <input id={`${prefix}-label`} name="label" required defaultValue={r?.label ?? ""} className="input" placeholder="e.g. Lecture 7 slides (PDF)" />
         </Field>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label={r?.filePath ? "Replace file" : "Upload file"} htmlFor={`${prefix}-file`} hint="PDF, slides, notebooks, code, images, video.">
+        <Field label={r?.filePath ? "Replace file" : "Upload file"} htmlFor={`${prefix}-file`} hint="PDF, PowerPoint, Keynote, images.">
           <input id={`${prefix}-file`} name="file" type="file" className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-ucla-lighterblue file:px-3 file:py-2 file:text-sm file:font-semibold file:text-ucla-darkestblue" />
         </Field>
-        <Field label="…or link" htmlFor={`${prefix}-url`} hint="Box, Google Drive, Bruin Learn, GitHub, etc.">
+        <Field label="…or link" htmlFor={`${prefix}-url`} hint="Box, Google Drive, Bruin Learn, etc.">
           <input id={`${prefix}-url`} name="url" type="url" defaultValue={r?.url ?? ""} className="input" placeholder="https://" />
         </Field>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Who can access" htmlFor={`${prefix}-access`} hint="Copyrighted or protected material: use Bruin Learn only.">
+        <Field label="Who can access" htmlFor={`${prefix}-access`} hint="Protected material: choose Bruin Learn only.">
           <Select id={`${prefix}-access`} name="access" defaultValue={r?.access ?? "PUBLIC"} options={accessOptions} />
         </Field>
-        <Field label="Release at (optional)" htmlFor={`${prefix}-releaseAt`} hint="Hidden until then, e.g. solutions after the due date.">
+        <Field label="Release at (optional)" htmlFor={`${prefix}-releaseAt`} hint="Hidden from students until then.">
           <input id={`${prefix}-releaseAt`} name="releaseAt" type="datetime-local" defaultValue={toCampusInput(r?.releaseAt)} className="input" />
         </Field>
         <Field label="Order" htmlFor={`${prefix}-sortOrder`}>
@@ -96,7 +96,7 @@ export function ResourceManager({ itemId, resources }: { itemId: string; resourc
         </ul>
       )}
       <form action={addResourceAction} className="card space-y-3 border-dashed p-4 sm:p-5">
-        <h3 className="font-semibold text-slate-900">Add a file or link</h3>
+        <h3 className="font-semibold text-slate-900">Add slides, notes or a link</h3>
         <input type="hidden" name="itemId" value={itemId} />
         <ResourceFields prefix="new" />
         <SubmitButton pendingText="Uploading…">Add</SubmitButton>

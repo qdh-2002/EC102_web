@@ -7,29 +7,26 @@ same site is reused every quarter.
 
 ## What's in it
 
+A deliberately simple site for **lecture recordings and slides**, reused every quarter.
+
 **For students (no login needed)**
 
-- **Home**: course overview, instructor credit, "this week", announcements, upcoming deadlines, recently uploaded materials.
-- **Built-in video player**: recordings stream in the browser (no download), with seeking, 0.75×–2× speed, ±10 s skips, resume where you left off, and captions.
-- **Lecture library**: every lecture by week and number, with recording, slides and notes. Filter by "has recording" / "recording pending".
-- **Discussions**: weekly slides, practice problems, solutions and section recordings.
-- **Homework & exams**: problem sets, solutions (released automatically after the due date), exams, practice exams, formula sheets, links to Bruin Learn.
-- **Course calendar**: this quarter's dates, with each class marked *Covered* / *Today* / *Upcoming*, and a progress bar.
-- **Search**: by title, topic or keyword, filtered by term, week and type (lectures, recordings, slides, solutions, formula sheets, …).
-- **Term switcher & archive**: the current term is the default; every past quarter stays browsable.
-- Consistent icons and labels for recordings, slides, PDFs, solutions, formula sheets, code and links, plus clear "New", "Recording coming soon", "Not yet posted", "Available Nov 20" and "UCLA login" labels.
-- Responsive (phone drawer navigation), keyboard accessible, skip link, WCAG-minded contrast, no client-side data fetching (fast first load).
+- **Home**: course overview, "Taught by Prof. Achuta Kadambi", this week's classes, recently uploaded recordings and slides.
+- **Lectures** and **Discussions**: every class by week, each with its recording and slides.
+- **Video player**: recordings stream in the browser (no download), with seeking, 0.75×–2× speed, ±10 s skips, resume where you left off, and captions.
+- **Course calendar**: each quarter's own dates, with every class marked *Covered* / *Today* / *Upcoming* and a progress bar, so students know where the class is.
+- **Search** by title or topic, and a **term switcher / archive** for past quarters.
+- Clear labels for "New", "Recording coming soon", "Not recorded", "Not yet posted" and "UCLA login" (Bruin Learn) links. Works on phones.
 
 **For course staff (`/admin`)**
 
-- Sign in with email + password. Two roles:
-  - **Admin** (instructor / site manager): everything, plus terms, staff accounts and permanent deletes.
-  - **Editor** (TA): create, edit, publish, unpublish and archive lectures, discussions, homework, exams, files and announcements.
-- Upload lecture recordings with a progress bar (multi-GB files are streamed to disk), or paste a link.
-- Upload files or paste links (Box, Drive, Bruin Learn, YouTube, …). Per-file access: **Public**, **Bruin Learn only** (students are sent to Bruin Learn; the uploaded copy is never served publicly), or **Staff only**. Optional release time for solutions.
-- Drafts, publish/unpublish, archive, duplicate, "flag as newly updated".
-- **Start a new quarter in one step** by copying a previous term: items are copied as drafts with dates shifted to the new calendar. Each lecture keeps its one recording, which is reused every year.
-- Scheduled announcements, activity log, built-in help page.
+- Two roles: **Admin** (instructor / site manager: terms, staff accounts, deletes) and **Editor** (TAs: add lectures and discussions, upload recordings and slides, publish).
+- Upload a recording with a progress bar (large files are fine) or paste a link; attach slides (PDF/PowerPoint) or links.
+- Per-file access: **Public**, **Bruin Learn only** (students are sent to Bruin Learn behind UCLA login), or **Staff only**.
+- **New quarter in one step**: copy last quarter's term with dates shifted. Each lecture keeps its one recording, which is reused every year; the new dates become that quarter's calendar.
+
+Homework/exams pages and announcements are built but switched off to keep things simple. Turn them on in
+`src/lib/constants.ts` (`FEATURES`) if you ever want them.
 
 ## Quick start (local)
 
@@ -47,14 +44,12 @@ Other scripts: `npm test` (unit tests), `npm run lint` (type check), `npm run bu
 
 ## Sample content
 
-The seed loads **Fall 2026** with the real schedule from the ECE 102 Fall 2026 syllabus (lecture titles and
-dates, discussion times, homework release/due dates, midterm, final, staff and office hours).
-**Every file is a generated placeholder PDF labelled "Sample"**, recording links point to the Bruin Learn
-home page, and announcements are samples. **Spring 2026** is an entirely fake archived term that shows how the archive works.
+The seed loads **Fall 2026** with the real lecture schedule from the ECE 102 Fall 2026 syllabus (lecture titles and
+dates, Friday discussions, staff and office hours). **Every file is a placeholder labelled "Sample"** (slide PDFs and
+one short demo video on Lecture 1), and other recording links point to the Bruin Learn home page. **Spring 2026** is an entirely fake archived term that shows how the archive works.
 A pink banner appears on any page with sample content. When the real files are in, an admin clicks
 **Dashboard → Remove all sample content**; the real schedule is kept.
 
-Assumptions to check: homework due times are set to 11:59 PM PT, and the midterm time to 8:00 AM (the syllabus gives dates only).
 
 ## Docs
 

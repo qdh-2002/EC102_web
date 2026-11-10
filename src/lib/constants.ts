@@ -101,3 +101,21 @@ export const COURSE = {
 
 /** URL segments that can never be used as a term slug. */
 export const RESERVED_SLUGS = ["admin", "api", "search", "archive", "files", "login", "about", "_next"];
+
+/**
+ * Keep the site simple: by default it is a recordings + slides site.
+ * Flip these to true to bring back the homework/exams section and announcements
+ * (all the code is still there).
+ */
+export const FEATURES = {
+  homeworkAndExams: false,
+  announcements: false,
+};
+
+/** Item kinds staff can create and students can browse. */
+export const ENABLED_KINDS: readonly ItemKind[] = FEATURES.homeworkAndExams ? ITEM_KINDS : ["LECTURE", "DISCUSSION"];
+
+/** Resource types offered in the admin and search. */
+export const ENABLED_RESOURCE_TYPES: readonly ResourceType[] = FEATURES.homeworkAndExams
+  ? RESOURCE_TYPES
+  : ["SLIDES", "NOTES", "VIDEO", "CAPTIONS", "LINK"];

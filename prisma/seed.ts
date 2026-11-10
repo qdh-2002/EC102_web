@@ -18,6 +18,7 @@ import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 import { parseCampusDateTime } from "../src/lib/dates";
 import { weekForDate } from "../src/lib/terms";
+import { FEATURES } from "../src/lib/constants";
 import { placeholderPdf } from "./pdf";
 
 const prisma = new PrismaClient();
@@ -157,9 +158,6 @@ async function seedFall2026() {
         "Prof. Kadambi office hours: Thursdays after class, 10–11am PT, E4 56-147J",
         "TA office hours: Tue 2–3pm, E4 67-112 (Qiudi) · Thu 12:30–1:30pm, E4 67-112 (Jim)",
         "Email the TAs with “F26 ECE 102” in the subject line. Please do not email the instructor personally.",
-        "Grading: Homework 30% · Participation 5% · Midterm 30% · Final 35%",
-        "Lowest homework dropped · 3 late days · final can replace a lower midterm",
-        "Final exam time and place: check MyUCLA",
       ].join("\n"),
       bruinLearnUrl: BRUIN_LEARN,
       quickLinks: ["Piazza | https://piazza.com/ucla/fall2026/ecengr102", "MyUCLA | https://my.ucla.edu/", "Center for Accessible Education | https://www.cae.ucla.edu/"].join("\n"),
@@ -273,13 +271,12 @@ async function seedFall2026() {
       resources: past
         ? [
             { type: "SLIDES", label: `Discussion ${n} slides`, pdf: { name: `discussion-${n}-slides.pdf`, title: `Discussion ${n} slides`, lines: [discTopics[i]] } },
-            { type: "PROBLEMS", label: `Discussion ${n} practice problems`, pdf: { name: `discussion-${n}-problems.pdf`, title: `Discussion ${n} practice problems`, lines: [discTopics[i]] } },
-            { type: "SOLUTIONS", label: `Discussion ${n} solutions`, pdf: { name: `discussion-${n}-solutions.pdf`, title: `Discussion ${n} solutions`, lines: [discTopics[i]] } },
           ]
         : [],
     });
   }
 
+  if (FEATURES.homeworkAndExams) {
   // Homework: release and due dates from the syllabus. Due times are assumed to be 11:59 PM PT.
   const hw: [number, string, string, string, string][] = [
     [1, "2026-10-01", "2026-10-08", "lectures 1 & 2", "signal operations, signal properties, complex numbers"],
@@ -351,6 +348,8 @@ async function seedFall2026() {
     publishedAt: null,
   });
 
+  }
+
   const ann = [
     {
       title: "HW4 is due this Thursday, 11/12",
@@ -371,7 +370,7 @@ async function seedFall2026() {
       pinned: false,
     },
   ];
-  for (const a of ann) await prisma.announcement.create({ data: { ...a, termId: term.id, isPlaceholder: true } });
+  if (FEATURES.announcements) for (const a of ann) await prisma.announcement.create({ data: { ...a, termId: term.id, isPlaceholder: true } });
   console.log("✓ Fall 2026 (current term, schedule from the syllabus, placeholder files)");
 }
 
@@ -413,6 +412,7 @@ async function seedSampleArchive() {
       resources: [...(i === 0 ? SAMPLE_VIDEO : []), { type: "SLIDES", label: `Lecture ${i + 1} slides`, pdf: { name: `s26-lecture-${i + 1}.pdf`, title: `Sample lecture ${i + 1}`, lines: [t] } }],
     });
   }
+  if (FEATURES.homeworkAndExams) {
   await addItem(term, {
     kind: "REVIEW",
     title: "Final formula sheet (sample)",
@@ -430,6 +430,7 @@ async function seedSampleArchive() {
     isPlaceholder: true,
     resources: [{ type: "PROBLEMS", label: "Sample HW1", pdf: { name: "s26-hw1.pdf", title: "Sample homework 1", lines: [] } }],
   });
+  }
   console.log("✓ Spring 2026 (sample archived term)");
 }
 

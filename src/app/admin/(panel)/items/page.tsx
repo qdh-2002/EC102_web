@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { pickTerm } from "@/lib/admin-data";
-import { ITEM_KIND_LABEL, ITEM_KINDS, ITEM_STATUSES, RECORDING_STATUS_LABEL, type ItemKind, type RecordingStatus } from "@/lib/constants";
+import { ITEM_KIND_LABEL, ENABLED_KINDS, ITEM_STATUSES, RECORDING_STATUS_LABEL, type ItemKind, type RecordingStatus } from "@/lib/constants";
 import { formatDate } from "@/lib/dates";
 import { termName, weekLabel } from "@/lib/terms";
 import { Flash, StatusPill } from "@/components/admin/fields";
@@ -17,10 +17,10 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const { terms, term } = await pickTerm(sp.term);
   if (!term) return <p>No terms yet. <Link href="/admin/terms/new" className="underline">Create one</Link>.</p>;
-  const kind = ITEM_KINDS.includes(sp.kind as ItemKind) ? sp.kind : undefined;
+  const kind = ENABLED_KINDS.includes(sp.kind as ItemKind) ? sp.kind : undefined;
   const status = ITEM_STATUSES.includes(sp.status as never) ? sp.status : undefined;
   const items = await prisma.item.findMany({
-    where: { termId: term.id, ...(kind ? { kind } : {}), ...(status ? { status } : {}) },
+    where: { termId: term.id, kind: kind ?? { in: [...ENABLED_KINDS] }, ...(status ? { status } : {}) },
     include: { _count: { select: { resources: true } } },
     orderBy: [{ week: "asc" }, { date: "asc" }, { kind: "asc" }, { number: "asc" }],
   });
@@ -52,7 +52,7 @@ export default async function ItemsPage({ searchParams }: { searchParams: Promis
           <label className="label" htmlFor="f-kind">Type</label>
           <select id="f-kind" name="kind" defaultValue={kind ?? ""} className="input">
             <option value="">All types</option>
-            {ITEM_KINDS.map((k) => (
+            {ENABLED_KINDS.map((k) => (
               <option key={k} value={k}>{ITEM_KIND_LABEL[k]}</option>
             ))}
           </select>

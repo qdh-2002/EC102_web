@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Term } from "@prisma/client";
-import { COURSE } from "@/lib/constants";
+import { COURSE, FEATURES } from "@/lib/constants";
 import { formatDateTime, formatLongDate, formatDate } from "@/lib/dates";
 import { currentWeek, instructorNames, parseInstructors, termName, totalWeeks, weekLabel } from "@/lib/terms";
 import { getAnnouncements, getItems, getRecentItems, getWeeks, viewer } from "@/lib/queries";
@@ -14,7 +14,7 @@ import { EmptyState } from "./SiteShell";
 export async function TermHome({ term }: { term: Term }) {
   const [{ isStaff }, announcements, recent, all, weeks] = await Promise.all([
     viewer(),
-    getAnnouncements(term.id),
+    FEATURES.announcements ? getAnnouncements(term.id) : Promise.resolve([]),
     getRecentItems(term.id, 6),
     getItems(term.id),
     getWeeks(term.id),
@@ -56,8 +56,11 @@ export async function TermHome({ term }: { term: Term }) {
             <Link href={`${base}/lectures`} className="btn-gold">
               <IconBook size={16} /> Lecture library
             </Link>
-            <Link href={`${base}/assignments`} className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
-              <IconClipboard size={16} /> Homework &amp; exams
+            <Link href={`${base}/discussions`} className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
+              <IconUsers size={16} /> Discussions
+            </Link>
+            <Link href={`${base}/schedule`} className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
+              <IconCalendar size={16} /> Course calendar
             </Link>
             <a href={term.bruinLearnUrl} target="_blank" rel="noopener noreferrer" className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
               Bruin Learn <IconExternal size={14} />
@@ -78,7 +81,7 @@ export async function TermHome({ term }: { term: Term }) {
                   {weekTopic && <span className="font-normal text-slate-600">· {weekTopic}</span>}
                 </h2>
                 <Link href={`${base}/schedule#week-${nowWeek}`} className="text-sm font-medium text-ucla-blue hover:underline">
-                  Full schedule →
+                  Course calendar →
                 </Link>
               </div>
               {thisWeek.length ? (
@@ -104,6 +107,7 @@ export async function TermHome({ term }: { term: Term }) {
           )}
 
           {/* Announcements */}
+          {FEATURES.announcements && (
           <section aria-labelledby="announcements">
             <h2 id="announcements" className="mb-3 flex items-center gap-2 text-lg font-bold text-ucla-darkestblue">
               <IconMegaphone size={20} className="text-ucla-blue" /> Announcements
@@ -131,6 +135,8 @@ export async function TermHome({ term }: { term: Term }) {
             )}
           </section>
 
+          )}
+
           {/* Recently uploaded */}
           <section aria-labelledby="recent">
             <h2 id="recent" className="mb-3 flex items-center gap-2 text-lg font-bold text-ucla-darkestblue">
@@ -149,6 +155,7 @@ export async function TermHome({ term }: { term: Term }) {
         </div>
 
         <aside className="space-y-6" aria-label="Course information">
+          {FEATURES.homeworkAndExams && (
           <section aria-labelledby="deadlines" className="card p-5">
             <h2 id="deadlines" className="flex items-center gap-2 font-bold text-ucla-darkestblue">
               <IconClock size={18} className="text-ucla-blue" /> Upcoming deadlines
@@ -179,6 +186,8 @@ export async function TermHome({ term }: { term: Term }) {
             </p>
           </section>
 
+          )}
+
           <section aria-labelledby="quick-links" className="card p-5">
             <h2 id="quick-links" className="font-bold text-ucla-darkestblue">
               Quick links
@@ -187,7 +196,6 @@ export async function TermHome({ term }: { term: Term }) {
               {[
                 { href: `${base}/lectures`, label: "Lectures", Icon: IconBook },
                 { href: `${base}/discussions`, label: "Discussions", Icon: IconUsers },
-                { href: `${base}/assignments`, label: "Homework", Icon: IconClipboard },
                 { href: `${base}/schedule`, label: "Calendar", Icon: IconCalendar },
               ].map(({ href, label, Icon }) => (
                 <li key={href}>

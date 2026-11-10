@@ -1,6 +1,6 @@
 import type { Item, Term } from "@prisma/client";
 import { saveItemAction } from "@/app/admin/actions";
-import { ITEM_KIND_LABEL, ITEM_KINDS, ITEM_STATUSES, RECORDING_STATUS_LABEL, RECORDING_STATUSES } from "@/lib/constants";
+import { ITEM_KIND_LABEL, ENABLED_KINDS, ITEM_STATUSES, RECORDING_STATUS_LABEL, RECORDING_STATUSES } from "@/lib/constants";
 import { toCampusInput } from "@/lib/dates";
 import { termName, weekLabel } from "@/lib/terms";
 import { Field, Select } from "./fields";
@@ -18,7 +18,7 @@ export function ItemForm({ item, terms, term, kind, videoName }: { item?: Item; 
           <Select id="termId" name="termId" defaultValue={item?.termId ?? term.id} options={terms.map((t) => ({ value: t.id, label: termName(t) }))} />
         </Field>
         <Field label="Type" htmlFor="kind">
-          <Select id="kind" name="kind" defaultValue={k} options={ITEM_KINDS.map((x) => ({ value: x, label: ITEM_KIND_LABEL[x] }))} />
+          <Select id="kind" name="kind" defaultValue={k} options={ENABLED_KINDS.map((x) => ({ value: x, label: ITEM_KIND_LABEL[x] }))} />
         </Field>
         <Field label="Status" htmlFor="status" hint="Only published items are visible to students.">
           <Select id="status" name="status" defaultValue={item?.status ?? "DRAFT"} options={ITEM_STATUSES.map((s) => ({ value: s, label: s === "DRAFT" ? "Draft (hidden)" : s === "PUBLISHED" ? "Published (visible)" : "Archived (hidden, kept)" }))} />
@@ -32,13 +32,17 @@ export function ItemForm({ item, terms, term, kind, videoName }: { item?: Item; 
           <input id="title" name="title" required maxLength={200} defaultValue={item?.title ?? ""} className="input" placeholder="e.g. Convolution and the impulse response" />
         </Field>
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Date" htmlFor="date" hint="Lecture/section date, or homework release date.">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Date" htmlFor="date" hint="The day of the class.">
           <input id="date" name="date" type="date" defaultValue={toCampusInput(item?.date, false)} className="input" />
         </Field>
-        <Field label={k === "HOMEWORK" ? "Due date & time" : "Exam / event time"} htmlFor="dueAt" hint="Optional. Pacific time.">
-          <input id="dueAt" name="dueAt" type="datetime-local" defaultValue={toCampusInput(item?.dueAt)} className="input" />
-        </Field>
+        {k === "LECTURE" || k === "DISCUSSION" ? (
+          <input type="hidden" name="dueAt" value={toCampusInput(item?.dueAt)} />
+        ) : (
+          <Field label={k === "HOMEWORK" ? "Due date & time" : "Exam / event time"} htmlFor="dueAt" hint="Optional. Pacific time.">
+            <input id="dueAt" name="dueAt" type="datetime-local" defaultValue={toCampusInput(item?.dueAt)} className="input" />
+          </Field>
+        )}
         <Field label="Week" htmlFor="week" hint="Leave blank to work it out from the date.">
           <select id="week" name="week" defaultValue={item?.week ?? ""} className="input">
             <option value="">Auto from date</option>
@@ -50,10 +54,10 @@ export function ItemForm({ item, terms, term, kind, videoName }: { item?: Item; 
           </select>
         </Field>
       </div>
-      <Field label="Description" htmlFor="description" hint="Shown on the item page. Plain text; blank lines start new paragraphs.">
+      <Field label="Description (optional)" htmlFor="description" hint="Shown on the lecture page.">
         <textarea id="description" name="description" rows={4} defaultValue={item?.description ?? ""} className="input" />
       </Field>
-      <Field label="Topics / keywords" htmlFor="topics" hint="Comma separated. Used for search, e.g. convolution, LTI systems, impulse response">
+      <Field label="Topics (optional)" htmlFor="topics" hint="Comma separated, used for search, e.g. convolution, impulse response">
         <input id="topics" name="topics" defaultValue={item?.topics ?? ""} className="input" />
       </Field>
       {showRecording ? (

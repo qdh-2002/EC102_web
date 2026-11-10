@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SiteShell, PageHeader, EmptyState } from "@/components/SiteShell";
 import { ItemCard } from "@/components/ItemCard";
 import { getCurrentTerm, getTerm, listTerms, searchItems, viewer } from "@/lib/queries";
-import { ITEM_KIND_PLURAL, ITEM_KINDS, RESOURCE_TYPE_LABEL, RESOURCE_TYPES } from "@/lib/constants";
+import { ITEM_KIND_PLURAL, ENABLED_KINDS, RESOURCE_TYPE_LABEL, ENABLED_RESOURCE_TYPES } from "@/lib/constants";
 import { termName, weekLabel } from "@/lib/terms";
 
 export const dynamic = "force-dynamic";
@@ -70,7 +70,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           <select id="type" name="type" defaultValue={filters.type} className="input">
             <option value="">Any type</option>
             <optgroup label="Section">
-              {ITEM_KINDS.map((k) => (
+              {ENABLED_KINDS.map((k) => (
                 <option key={k} value={k}>
                   {ITEM_KIND_PLURAL[k]}
                 </option>
@@ -78,7 +78,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             </optgroup>
             <optgroup label="Has resource">
               <option value="RECORDING">Recordings</option>
-              {RESOURCE_TYPES.map((r) => (
+              {ENABLED_RESOURCE_TYPES.filter((r) => r !== "CAPTIONS" && r !== "VIDEO").map((r) => (
                 <option key={r} value={r}>
                   {RESOURCE_TYPE_LABEL[r]}
                 </option>
@@ -95,7 +95,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <div className="card p-5">
           <h2 className="font-semibold text-slate-900">Popular topics</h2>
           <ul className="mt-3 flex flex-wrap gap-2">
-            {["convolution", "LTI systems", "Fourier series", "Fourier transform", "Laplace transform", "sampling", "Bode plot", "filters", "impulse response"].map((t) => (
+            {["convolution", "LTI systems", "Fourier series", "Fourier transform", "Laplace transform", "sampling", "impulse response"].map((t) => (
               <li key={t}>
                 <Link href={`/search?q=${encodeURIComponent(t)}&term=all`} className="rounded-full bg-ucla-lighterblue px-3 py-1.5 text-sm font-medium text-ucla-darkestblue hover:bg-ucla-lightblue">
                   {t}
