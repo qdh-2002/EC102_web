@@ -5,7 +5,7 @@ import { COURSE } from "@/lib/constants";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
   title: { default: `${COURSE.code}: ${COURSE.name} | UCLA`, template: `%s | ${COURSE.code}` },
-  description: `Lecture recordings, slides, discussion materials, homework and exam preparation for UCLA ${COURSE.code}: ${COURSE.name}.`,
+  description: `Lecture recordings and slides for UCLA ${COURSE.code}: ${COURSE.name}, taught by Prof. Achuta Kadambi.`,
 };
 
 export const viewport: Viewport = { themeColor: "#2774AE", width: "device-width", initialScale: 1 };

@@ -19,7 +19,7 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
         <h1 className="text-2xl font-bold text-ucla-darkestblue">Staff accounts</h1>
         <p className="text-sm text-slate-600">
           <strong>Admins</strong> manage terms, staff accounts and can permanently delete. <strong>Editors</strong> (TAs) add, edit, publish and archive
-          lectures, discussions, homework, exams and announcements. Students never need an account.
+          lectures, recordings and slides. Students never need an account.
         </p>
       </div>
       <Flash sp={sp} />

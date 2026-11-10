@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const me = await requireStaff();
   const links = [
     { href: "/admin", label: "Dashboard", exact: true },
-    { href: "/admin/items", label: "Lectures & discussions" },
+    { href: "/admin/items", label: "Lectures" },
     ...(FEATURES.announcements ? [{ href: "/admin/announcements", label: "Announcements" }] : []),
     { href: "/admin/terms", label: "Terms" },
     ...(me.role === "ADMIN" ? [{ href: "/admin/users", label: "Staff accounts" }] : []),

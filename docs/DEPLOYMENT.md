@@ -28,7 +28,7 @@ ec102.example.ucla.edu {
 If you use nginx, allow large recording uploads with `client_max_body_size 4g;` and `proxy_request_buffering off;`
 (Caddy needs no change).
 
-**Storage sizing:** an hour of lecture video at 720p is roughly 300–700 MB. Plan disk for about 20 lectures + 10 discussions
+**Storage sizing:** an hour of lecture video at 720p is roughly 300–700 MB. Plan disk for about 20 lectures
 per term; since recordings are reused across years, this does not grow much over time.
 
 Everything persistent lives in the `ec102-data` Docker volume (`/data/ec102.db` and `/data/uploads`).

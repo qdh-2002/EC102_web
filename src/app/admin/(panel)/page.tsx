@@ -60,9 +60,11 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <Link href={`/admin/items/new?term=${term.id}&kind=LECTURE`} className="btn-primary">
             + Lecture
           </Link>
-          <Link href={`/admin/items/new?term=${term.id}&kind=DISCUSSION`} className="btn-secondary">
-            + Discussion
-          </Link>
+          {ENABLED_KINDS.includes("DISCUSSION") && (
+            <Link href={`/admin/items/new?term=${term.id}&kind=DISCUSSION`} className="btn-secondary">
+              + Discussion
+            </Link>
+          )}
         </div>
       </div>
 

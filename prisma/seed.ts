@@ -154,7 +154,6 @@ async function seedFall2026() {
         "An introduction to signals and systems from a mathematical perspective. A signal is a function and a representation of information; a system manipulates such functions. You will learn to represent and manipulate information not only in the domain where it is presented (the time domain) but also in a dual domain (the frequency domain), with applications from AI and robotics to circuit design.",
       logistics: [
         "Lectures: Tuesdays & Thursdays (see the course calendar)",
-        "Discussion: Fridays 11am, Boelter Hall 5419 (recorded to the Bruin Learn Media Gallery)",
         "Prof. Kadambi office hours: Thursdays after class, 10–11am PT, E4 56-147J",
         "TA office hours: Tue 2–3pm, E4 67-112 (Qiudi) · Thu 12:30–1:30pm, E4 67-112 (Jim)",
         "Email the TAs with “F26 ECE 102” in the subject line. Please do not email the instructor personally.",
@@ -235,6 +234,7 @@ async function seedFall2026() {
     });
   }
 
+  if (FEATURES.discussions) {
   // Discussions: Fridays 11am, covering that week's lectures.
   const fridays = ["10-02", "10-09", "10-16", "10-23", "10-30", "11-06", "11-13", "11-20", "11-27", "12-04"];
   const discTopics = [
@@ -274,6 +274,8 @@ async function seedFall2026() {
           ]
         : [],
     });
+  }
+
   }
 
   if (FEATURES.homeworkAndExams) {

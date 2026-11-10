@@ -54,10 +54,7 @@ export async function TermHome({ term }: { term: Term }) {
           {term.overview && <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/90">{term.overview}</p>}
           <div className="mt-5 flex flex-wrap gap-2">
             <Link href={`${base}/lectures`} className="btn-gold">
-              <IconBook size={16} /> Lecture library
-            </Link>
-            <Link href={`${base}/discussions`} className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
-              <IconUsers size={16} /> Discussions
+              <IconBook size={16} /> Lectures
             </Link>
             <Link href={`${base}/schedule`} className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
               <IconCalendar size={16} /> Course calendar
@@ -195,7 +192,6 @@ export async function TermHome({ term }: { term: Term }) {
             <ul className="mt-3 grid grid-cols-2 gap-2 text-sm">
               {[
                 { href: `${base}/lectures`, label: "Lectures", Icon: IconBook },
-                { href: `${base}/discussions`, label: "Discussions", Icon: IconUsers },
                 { href: `${base}/schedule`, label: "Calendar", Icon: IconCalendar },
               ].map(({ href, label, Icon }) => (
                 <li key={href}>

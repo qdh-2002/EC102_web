@@ -103,17 +103,20 @@ export const COURSE = {
 export const RESERVED_SLUGS = ["admin", "api", "search", "archive", "files", "login", "about", "_next"];
 
 /**
- * Keep the site simple: by default it is a recordings + slides site.
- * Flip these to true to bring back the homework/exams section and announcements
+ * Keep the site simple: by default it is a lecture recordings + slides site.
+ * Flip these to true to bring back discussions, the homework/exams section or announcements
  * (all the code is still there).
  */
 export const FEATURES = {
+  discussions: false,
   homeworkAndExams: false,
   announcements: false,
 };
 
 /** Item kinds staff can create and students can browse. */
-export const ENABLED_KINDS: readonly ItemKind[] = FEATURES.homeworkAndExams ? ITEM_KINDS : ["LECTURE", "DISCUSSION"];
+export const ENABLED_KINDS: readonly ItemKind[] = ITEM_KINDS.filter(
+  (k) => k === "LECTURE" || (k === "DISCUSSION" && FEATURES.discussions) || (k !== "DISCUSSION" && FEATURES.homeworkAndExams),
+);
 
 /** Resource types offered in the admin and search. */
 export const ENABLED_RESOURCE_TYPES: readonly ResourceType[] = FEATURES.homeworkAndExams

@@ -52,7 +52,7 @@ export default async function ArchivePage() {
                         Taught by {instructorNames(t.instructors).join(", ") || "instructor TBA"}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
-                        Starts {formatLongDate(t.startDate)} · {count(t.id, "LECTURE")} lectures · {count(t.id, "DISCUSSION")} discussions · {count(t.id, "HOMEWORK")} homework
+                        Starts {formatLongDate(t.startDate)} · {count(t.id, "LECTURE")} lectures
                       </p>
                     </div>
                     <IconChevronRight size={20} className="text-slate-400 group-hover:text-ucla-blue" />

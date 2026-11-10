@@ -23,7 +23,7 @@ export default async function NewTerm({ searchParams }: { searchParams: Promise<
           <div>
             <h2 className="text-lg font-bold text-ucla-darkestblue">Recommended: start from a previous term</h2>
             <p className="text-sm text-slate-600">
-              Copies week topics and every lecture, discussion, homework and exam as <strong>drafts</strong>, with dates shifted to the new calendar.
+              Copies week topics and every lecture as <strong>drafts</strong>, with dates shifted to the new calendar.
               Recording links carry over too, since each lecture keeps one recording that is reused every year. Lectures without a recording are
               marked “recording coming soon”.
             </p>
