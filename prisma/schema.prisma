@@ -1,0 +1,141 @@
+// EC ENGR 102 course site data model.
+//
+// SQLite is the default so the site runs anywhere with zero setup.
+// To use PostgreSQL in production, change `provider` to "postgresql" and point
+// DATABASE_URL at your database (see docs/DEPLOYMENT.md). No other change is needed.
+//
+// String "enum" fields are validated in src/lib/constants.ts so the schema stays
+// portable across database providers.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/// An academic quarter, e.g. Fall 2026. Everything else hangs off a term.
+model Term {
+  id            String   @id @default(cuid())
+  slug          String   @unique // e.g. "fall-2026", used in URLs
+  quarter       String // FALL | WINTER | SPRING | SUMMER
+  year          Int
+  startDate     DateTime // Monday of week 1 (used to compute the current week)
+  numWeeks      Int      @default(10) // instructional weeks; finals week is numWeeks + 1
+  isCurrent     Boolean  @default(false) // exactly one term should be current
+  status        String   @default("ACTIVE") // DRAFT | ACTIVE | ARCHIVED
+  instructors   String   @default("") // free text, one per line: "Name | email | role"
+  overview      String   @default("") // course description shown on the homepage
+  logistics     String   @default("") // lecture times, office hours, etc. (one per line)
+  bruinLearnUrl String   @default("https://bruinlearn.ucla.edu/")
+  syllabusUrl   String   @default("")
+  isSample      Boolean  @default(false) // a demo term created by the seed script
+  quickLinks    String   @default("") // one per line: "Label | https://..." (Piazza, Gradescope, ...)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  weeks         Week[]
+  items         Item[]
+  announcements Announcement[]
+}
+
+/// Optional per-week topic so the timeline reads well, e.g. "Week 3: Convolution".
+model Week {
+  id     String @id @default(cuid())
+  termId String
+  number Int
+  topic  String @default("")
+  notes  String @default("")
+  term   Term   @relation(fields: [termId], references: [id], onDelete: Cascade)
+
+  @@unique([termId, number])
+}
+
+/// A unit of course content: a lecture, a discussion section, a homework, an exam, etc.
+model Item {
+  id              String    @id @default(cuid())
+  termId          String
+  kind            String // LECTURE | DISCUSSION | HOMEWORK | EXAM | REVIEW
+  number          Int? // lecture #, discussion #, homework #
+  title           String
+  week            Int? // 1..numWeeks, numWeeks+1 = finals week
+  date            DateTime? // lecture/discussion date, or release date for HW
+  dueAt           DateTime? // homework due date / exam date-time
+  description     String    @default("")
+  topics          String    @default("") // comma separated keywords for search
+  recordingUrl    String    @default("")
+  recordingStatus String    @default("NONE") // AVAILABLE | PENDING | NONE | NOT_RECORDED
+  status          String    @default("DRAFT") // DRAFT | PUBLISHED | ARCHIVED
+  publishedAt     DateTime?
+  isPlaceholder   Boolean   @default(false) // sample content, shown with a badge
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  term      Term       @relation(fields: [termId], references: [id], onDelete: Cascade)
+  resources Resource[]
+
+  @@index([termId, kind, status])
+}
+
+/// A file or link attached to an item: slides, notes, solutions, a formula sheet...
+model Resource {
+  id        String    @id @default(cuid())
+  itemId    String
+  type      String // SLIDES | NOTES | HANDOUT | SOLUTIONS | VIDEO | CODE | FORMULA_SHEET | LINK
+  label     String
+  url       String    @default("") // external link (Box, Drive, Bruin Learn, YouTube, ...)
+  filePath  String    @default("") // uploaded file, relative to UPLOAD_DIR
+  fileName  String    @default("")
+  fileSize  Int       @default(0)
+  mimeType  String    @default("")
+  access    String    @default("PUBLIC") // PUBLIC | BRUIN_LEARN | STAFF
+  releaseAt DateTime? // hidden from students until this time (e.g. solutions)
+  sortOrder Int       @default(0)
+  isPlaceholder Boolean @default(false) // sample file, shown with a badge
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  item Item @relation(fields: [itemId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id            String    @id @default(cuid())
+  termId        String
+  title         String
+  body          String
+  pinned        Boolean   @default(false)
+  status        String    @default("PUBLISHED") // DRAFT | PUBLISHED | ARCHIVED
+  publishedAt   DateTime  @default(now())
+  isPlaceholder Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  term          Term      @relation(fields: [termId], references: [id], onDelete: Cascade)
+}
+
+/// Course staff accounts. Students never need an account.
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  role         String     @default("EDITOR") // ADMIN | EDITOR
+  active       Boolean    @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  logs         AuditLog[]
+}
+
+/// Who changed what, for accountability across TAs and terms.
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String   @default("")
+  summary   String   @default("")
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}

@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-ucla-blue ring-offset-2;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  }
+}
+
+@layer components {
+  .prose-course p { @apply my-2 leading-relaxed; }
+  .prose-course a { @apply font-medium text-ucla-blue underline; }
+  .prose-course ul { @apply my-2 list-disc pl-5; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50; }
+  .btn-primary { @apply btn bg-ucla-blue text-white hover:bg-ucla-darkblue; }
+  .btn-gold { @apply btn bg-ucla-gold text-ucla-darkestblue hover:bg-ucla-darkgold; }
+  .btn-secondary { @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-50; }
+  .btn-danger { @apply btn border border-red-300 bg-white text-red-700 hover:bg-red-50; }
+  .input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-ucla-blue focus:outline-none focus:ring-2 focus:ring-ucla-blue/30; }
+  .label { @apply mb-1 block text-sm font-medium text-slate-800; }
+  .hint { @apply mt-1 text-xs text-slate-500; }
+  .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
+}

@@ -1,0 +1,14 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      DATABASE_URL: "file:/data/ec102.db"
+      UPLOAD_DIR: "/data/uploads"
+    volumes:
+      - ec102-data:/data   # database + uploaded course files. BACK THIS UP.
+volumes:
+  ec102-data:
