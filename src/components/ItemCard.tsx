@@ -37,7 +37,7 @@ export function ItemCard({ item, termSlug, numWeeks, staff, showWeek = false, sh
       <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
         {termLabel && <span className="text-ucla-darkblue">{termLabel}</span>}
         {showKind && <span>{ITEM_KIND_LABEL[item.kind as ItemKind]}</span>}
-        {showWeek && <span>{weekLabel(item.week, numWeeks)}</span>}
+        {showWeek && item.week != null && <span>{weekLabel(item.week, numWeeks)}</span>}
         {item.date && (
           <time dateTime={item.date.toISOString()} className="normal-case tracking-normal">
             {formatDate(item.date)}

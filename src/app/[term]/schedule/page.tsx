@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getItems, getTerm, getWeeks, viewer } from "@/lib/queries";
-import { coverage, termName, weekLabel } from "@/lib/terms";
+import { coverage, hasCalendar, termName, weekLabel } from "@/lib/terms";
 import { formatDate } from "@/lib/dates";
 import { itemHref } from "@/lib/links";
 import { ITEM_KIND_LABEL, type ItemKind } from "@/lib/constants";
 import { WeekGroups } from "@/components/WeekGroups";
-import { PageHeader } from "@/components/SiteShell";
+import { EmptyState, PageHeader } from "@/components/SiteShell";
 import { CoverageBadge } from "@/components/badges";
 
 export const metadata = { title: "Course calendar" };
@@ -15,6 +15,17 @@ export default async function SchedulePage({ params, searchParams }: { params: P
   const [{ term: slug }, sp] = await Promise.all([params, searchParams]);
   const term = await getTerm(slug);
   if (!term) notFound();
+  if (!hasCalendar(term))
+    return (
+      <>
+        <PageHeader eyebrow={termName(term)} title="Course calendar" />
+        <EmptyState title="This term has no calendar">
+          <Link href={`/${term.slug}/lectures`} className="font-medium text-ucla-blue hover:underline">
+            Browse all lectures →
+          </Link>
+        </EmptyState>
+      </>
+    );
   const [items, weeks, { isStaff }] = await Promise.all([getItems(term.id), getWeeks(term.id), viewer()]);
   const view = sp.view === "materials" ? "materials" : "calendar";
   const lectures = items.filter((i) => i.kind === "LECTURE" && i.date);

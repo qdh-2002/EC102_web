@@ -5,7 +5,7 @@ export type TermLike = {
   slug: string;
   quarter: string;
   year: number;
-  startDate: Date;
+  startDate: Date | null;
   numWeeks: number;
   status: string;
   isCurrent: boolean;
@@ -36,16 +36,22 @@ export function weekLabel(week: number | null | undefined, numWeeks: number): st
   return `Week ${week}`;
 }
 
-/** Monday of the given week. */
-export function weekStart(t: Pick<TermLike, "startDate">, week: number): Date {
-  return addDays(t.startDate, (week - 1) * 7);
+/** Does this term have dates (a Week 1 Monday)? Terms without one have no calendar or "this week". */
+export function hasCalendar(t: Pick<TermLike, "startDate">): boolean {
+  return t.startDate != null;
+}
+
+/** Monday of the given week (null for a term with no calendar). */
+export function weekStart(t: Pick<TermLike, "startDate">, week: number): Date | null {
+  return t.startDate ? addDays(t.startDate, (week - 1) * 7) : null;
 }
 
 /**
  * Which week of the term `now` falls in. Returns 0 before the term starts and
- * numWeeks + 2 after finals week ends.
+ * numWeeks + 2 after finals week ends. Always 0 for a term with no calendar.
  */
 export function currentWeek(t: Pick<TermLike, "startDate" | "numWeeks">, now = new Date()): number {
+  if (!t.startDate) return 0;
   const diff = now.getTime() - t.startDate.getTime();
   if (diff < 0) return 0;
   const w = Math.floor(diff / (7 * DAY_MS)) + 1;
@@ -66,15 +72,21 @@ export function parseInstructors(text: string) {
     .map((l) => l.trim())
     .filter(Boolean)
     .map((line) => {
-      const [name, email = "", role = ""] = line.split("|").map((s) => s.trim());
-      return { name, email, role };
+      const [name, email = "", role = "", link = ""] = line.split("|").map((s) => s.trim());
+      // Only http(s) links are shown, so a typo can't produce a broken or unsafe href.
+      return { name, email, role, url: /^https?:\/\//i.test(link) ? link : "" };
     });
 }
 
-export function instructorNames(text: string): string[] {
+/** Instructors (not TAs/graders), with their optional profile link. */
+export function instructorList(text: string): { name: string; url: string }[] {
   return parseInstructors(text)
     .filter((s) => /instructor|professor|lecturer/i.test(s.role))
-    .map((s) => s.name);
+    .map(({ name, url }) => ({ name, url }));
+}
+
+export function instructorNames(text: string): string[] {
+  return instructorList(text).map((s) => s.name);
 }
 
 export function parseQuickLinks(text: string) {

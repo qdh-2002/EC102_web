@@ -3,7 +3,7 @@ import type { Term } from "@prisma/client";
 import type { ItemWithResources } from "@/lib/queries";
 import { ITEM_KIND_LABEL, RECORDING_STATUS_LABEL, type ItemKind, type RecordingStatus } from "@/lib/constants";
 import { formatDate, formatDateTime, formatLongDate } from "@/lib/dates";
-import { coverage, weekLabel } from "@/lib/terms";
+import { coverage, hasCalendar, weekLabel } from "@/lib/terms";
 import { hasRecording, isNew, recordingVideo, resourceState } from "@/lib/access";
 import { VideoPlayer } from "./VideoPlayer";
 import { splitTopics } from "@/lib/format";
@@ -12,7 +12,7 @@ import { itemHeading } from "./ItemCard";
 import { RecordingPlayer } from "./RecordingPlayer";
 import { ResourceLink } from "./ResourceLink";
 import { CoverageBadge, DraftBadge, KindBadge, MissingBadge, NewBadge, PlaceholderBadge } from "./badges";
-import { IconExternal, IconPencil } from "./icons";
+import { IconExternal } from "./icons";
 
 const hasRecordingSlot = (kind: string) => kind === "LECTURE" || kind === "DISCUSSION";
 
@@ -25,6 +25,8 @@ export function ItemDetail({ item, term, staff, siblings }: { item: ItemWithReso
   const idx = siblings.findIndex((s) => s.id === item.id);
   const prev = idx > 0 ? siblings[idx - 1] : null;
   const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+  // Terms with no calendar only show a week when one was set by hand.
+  const showWeek = item.week != null || hasCalendar(term);
   const sectionLabel = section === "lectures" ? "Lectures" : section === "discussions" ? "Discussions" : "Homework & Exams";
 
   return (
@@ -36,8 +38,12 @@ export function ItemDetail({ item, term, staff, siblings }: { item: ItemWithReso
               {sectionLabel}
             </Link>
           </li>
-          <li aria-hidden="true">/</li>
-          <li>{weekLabel(item.week, term.numWeeks)}</li>
+          {showWeek && (
+            <>
+              <li aria-hidden="true">/</li>
+              <li>{weekLabel(item.week, term.numWeeks)}</li>
+            </>
+          )}
         </ol>
       </nav>
 
@@ -54,10 +60,12 @@ export function ItemDetail({ item, term, staff, siblings }: { item: ItemWithReso
           {h.title}
         </h1>
         <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">
-          <div className="flex gap-1">
-            <dt className="font-medium text-slate-800">Week:</dt>
-            <dd>{weekLabel(item.week, term.numWeeks)}</dd>
-          </div>
+          {showWeek && (
+            <div className="flex gap-1">
+              <dt className="font-medium text-slate-800">Week:</dt>
+              <dd>{weekLabel(item.week, term.numWeeks)}</dd>
+            </div>
+          )}
           {item.date && (
             <div className="flex gap-1">
               <dt className="font-medium text-slate-800">{item.kind === "HOMEWORK" ? "Released:" : "Date:"}</dt>
@@ -81,11 +89,6 @@ export function ItemDetail({ item, term, staff, siblings }: { item: ItemWithReso
             </div>
           )}
         </dl>
-        {staff && (
-          <Link href={`/admin/items/${item.id}`} className="btn-secondary mt-4">
-            <IconPencil size={14} /> Edit in admin
-          </Link>
-        )}
       </header>
 
       {hasRecordingSlot(item.kind) && coverage(item.date) === "upcoming" && hasRecording(item) && (

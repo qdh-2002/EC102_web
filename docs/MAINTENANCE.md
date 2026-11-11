@@ -5,7 +5,7 @@ Everything below is done in the browser at `/admin`. No code changes are needed 
 ## Every week (TAs / editors)
 
 1. **Before lecture:** Lectures → open the lecture (or *+ Lecture*) → attach slides under **Files & links**.
-   Uploading to a published item gives it a "New" badge and puts it in "Recently uploaded" for 7 days.
+   Uploading to a published item gives it a "New" badge for 7 days.
 2. **After lecture:** open the lecture and either
    - **Upload recording** (recommended): pick the video file and watch the progress bar. It plays in the site's own
      video player, so students stream it in the browser with no download: instant seeking, 0.75×–2× speed,

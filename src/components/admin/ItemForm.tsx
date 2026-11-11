@@ -2,7 +2,7 @@ import type { Item, Term } from "@prisma/client";
 import { saveItemAction } from "@/app/admin/actions";
 import { ITEM_KIND_LABEL, ENABLED_KINDS, ITEM_STATUSES, RECORDING_STATUS_LABEL, RECORDING_STATUSES } from "@/lib/constants";
 import { toCampusInput } from "@/lib/dates";
-import { termName, weekLabel } from "@/lib/terms";
+import { hasCalendar, termName, weekLabel } from "@/lib/terms";
 import { Field, Select } from "./fields";
 import { SubmitButton } from "./ui";
 import { RecordingUploader } from "./RecordingUploader";
@@ -33,7 +33,7 @@ export function ItemForm({ item, terms, term, kind, videoName }: { item?: Item; 
         </Field>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Date" htmlFor="date" hint="The day of the class.">
+        <Field label="Date" htmlFor="date" hint={hasCalendar(term) ? "The day of the class." : "Optional. This term has no calendar, so you can leave it blank."}>
           <input id="date" name="date" type="date" defaultValue={toCampusInput(item?.date, false)} className="input" />
         </Field>
         {k === "LECTURE" || k === "DISCUSSION" ? (
@@ -43,9 +43,9 @@ export function ItemForm({ item, terms, term, kind, videoName }: { item?: Item; 
             <input id="dueAt" name="dueAt" type="datetime-local" defaultValue={toCampusInput(item?.dueAt)} className="input" />
           </Field>
         )}
-        <Field label="Week" htmlFor="week" hint="Leave blank to work it out from the date.">
+        <Field label="Week" htmlFor="week" hint={hasCalendar(term) ? "Leave blank to work it out from the date." : "Optional."}>
           <select id="week" name="week" defaultValue={item?.week ?? ""} className="input">
-            <option value="">Auto from date</option>
+            <option value="">{hasCalendar(term) ? "Auto from date" : "None"}</option>
             {Array.from({ length: term.numWeeks + 1 }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
                 {weekLabel(n, term.numWeeks)}

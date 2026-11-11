@@ -22,7 +22,7 @@ model Term {
   slug          String   @unique // e.g. "fall-2026", used in URLs
   quarter       String // FALL | WINTER | SPRING | SUMMER
   year          Int
-  startDate     DateTime // Monday of week 1 (used to compute the current week)
+  startDate     DateTime? // Monday of week 1 (drives the calendar and "this week"); null = term with no calendar
   numWeeks      Int      @default(10) // instructional weeks; finals week is numWeeks + 1
   isCurrent     Boolean  @default(false) // exactly one term should be current
   status        String   @default("ACTIVE") // DRAFT | ACTIVE | ARCHIVED

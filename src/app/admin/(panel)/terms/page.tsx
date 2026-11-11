@@ -37,7 +37,7 @@ export default async function TermsPage({ searchParams }: { searchParams: Promis
                 {t.isCurrent && <span className="rounded-full bg-ucla-gold px-2 py-0.5 text-xs font-bold text-ucla-darkestblue">current</span>}
               </div>
               <p className="text-xs text-slate-500">
-                Starts {formatLongDate(t.startDate)} · {counts.find((c) => c.termId === t.id)?._count ?? 0} items · /{t.slug}
+                {t.startDate ? `Starts ${formatLongDate(t.startDate)}` : "No calendar"} · {counts.find((c) => c.termId === t.id)?._count ?? 0} items · /{t.slug}
               </p>
             </div>
             {isAdmin && (

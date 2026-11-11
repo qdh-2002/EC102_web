@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { Term, Week } from "@prisma/client";
 import { COURSE, FEATURES } from "@/lib/constants";
-import { currentWeek, instructorNames, parseQuickLinks, termName, totalWeeks, weekLabel } from "@/lib/terms";
+import { currentWeek, hasCalendar, instructorNames, parseQuickLinks, termName, totalWeeks, weekLabel } from "@/lib/terms";
 import { prisma } from "@/lib/db";
 import { listTerms, viewer, getCurrentTerm } from "@/lib/queries";
 import { MobileDrawer } from "./MobileDrawer";
 import { NavLinks, type NavItem } from "./NavLinks";
 import { TermSwitcher } from "./TermSwitcher";
+import { InstructorLinks } from "./InstructorLinks";
 import { IconArchive, IconExternal, IconSearch, IconSettings } from "./icons";
 
 export async function SiteShell({ term, children }: { term: Term | null; children: React.ReactNode }) {
@@ -25,7 +26,7 @@ export async function SiteShell({ term, children }: { term: Term | null; childre
         { href: `${base}/lectures`, label: "Lectures", icon: "lectures" },
         ...(FEATURES.discussions ? [{ href: `${base}/discussions`, label: "Discussions", icon: "discussions" } as NavItem] : []),
         ...(FEATURES.homeworkAndExams ? [{ href: `${base}/assignments`, label: "Homework & Exams", icon: "assignments" } as NavItem] : []),
-        { href: `${base}/schedule`, label: "Course calendar", icon: "schedule" },
+        ...(hasCalendar(term) ? [{ href: `${base}/schedule`, label: "Course calendar", icon: "schedule" } as NavItem] : []),
         { href: "/search", label: "Search", icon: "search" },
         { href: "/archive", label: "All terms & archive", icon: "archive" },
       ]
@@ -57,7 +58,7 @@ export async function SiteShell({ term, children }: { term: Term | null; childre
               <nav aria-label="Sections">
                 <NavLinks items={nav} />
               </nav>
-              {term && (
+              {term && hasCalendar(term) && (
                 <nav aria-label="Week-by-week timeline">
                   <h2 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Course timeline</h2>
                   <ol className="relative ml-3 border-l-2 border-slate-200">
@@ -201,7 +202,7 @@ export async function SiteShell({ term, children }: { term: Term | null; childre
             <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
               <p>
                 {COURSE.code} ({COURSE.shortCode}): {COURSE.name}
-                {term && instructorNames(term.instructors).length > 0 && <> · Taught by {instructorNames(term.instructors).join(", ")}</>} · {COURSE.department},{" "}
+                {term && instructorNames(term.instructors).length > 0 && <> · Taught by <InstructorLinks instructors={term.instructors} className="text-ucla-blue hover:underline" /></>} · {COURSE.department},{" "}
                 {COURSE.institution}
               </p>
               <p>

@@ -63,7 +63,7 @@ const SAMPLE_VIDEO: Res[] = [
 ];
 
 async function addItem(
-  term: { id: string; slug: string; startDate: Date; numWeeks: number },
+  term: { id: string; slug: string; startDate: Date | null; numWeeks: number },
   it: {
     kind: string;
     number?: number | null;
@@ -143,7 +143,7 @@ async function seedFall2026() {
       isCurrent: true,
       status: "ACTIVE",
       instructors: [
-        "Prof. Achuta Kadambi | | Instructor",
+        "Prof. Achuta Kadambi | | Instructor | https://samueli.ucla.edu/people/achuta-kadambi/",
         "Jim Solomon | jimsolomon@g.ucla.edu | Teaching Assistant",
         "Qiudi He | qdhe02@g.ucla.edu | Teaching Assistant",
         "Haruka Johnson | | Grader",

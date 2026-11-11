@@ -173,7 +173,7 @@ export async function markItemNewAction(fd: FormData) {
   await prisma.item.update({ where: { id }, data: { publishedAt: new Date() } });
   await audit(me.id, "update", "item", id, "re-flagged as new");
   refresh();
-  back(`/admin/items/${id}`, { saved: "Item will show a “New” badge and appear in Recently uploaded." });
+  back(`/admin/items/${id}`, { saved: "Item will show a “New” badge." });
 }
 
 export async function duplicateItemAction(fd: FormData) {
@@ -258,7 +258,7 @@ export async function addResourceAction(fd: FormData) {
   }
   const sortOrder = data.sortOrder || (Math.max(0, ...item.resources.map((r) => r.sortOrder)) + 1);
   await prisma.resource.create({ data: { ...data, sortOrder, itemId, ...fileData } });
-  // New uploads on a published item show the "New" badge and appear in "Recently uploaded".
+  // New uploads on a published item show the "New" badge.
   if (item.status === "PUBLISHED") await prisma.item.update({ where: { id: itemId }, data: { publishedAt: new Date() } });
   await audit(me.id, "create", "resource", itemId, `${data.label} on ${item.title}`);
   refresh();
@@ -354,7 +354,7 @@ export async function deleteAnnouncementAction(fd: FormData) {
 const termSchema = z.object({
   quarter: z.enum(QUARTERS),
   year: z.number().int().min(2000).max(2100),
-  startDate: z.date({ invalid_type_error: "is required" }),
+  startDate: z.date().nullable(), // null = term with no calendar
   numWeeks: z.number().int().min(1).max(15),
   status: z.enum(TERM_STATUSES),
   instructors: z.string().max(5000),
@@ -366,10 +366,13 @@ const termSchema = z.object({
 });
 
 function readTerm(fd: FormData) {
-  return termSchema.safeParse({
+  const noCalendar = bool(fd, "noCalendar");
+  return termSchema
+    .refine((t) => noCalendar || t.startDate, { message: "Week 1 Monday is required (or tick “No calendar”).", path: ["startDate"] })
+    .safeParse({
     quarter: str(fd, "quarter"),
     year: optInt(fd, "year"),
-    startDate: parseCampusDateTime(str(fd, "startDate")),
+    startDate: noCalendar ? null : parseCampusDateTime(str(fd, "startDate")),
     numWeeks: optInt(fd, "numWeeks") ?? 10,
     status: str(fd, "status") || "DRAFT",
     instructors: str(fd, "instructors"),
@@ -463,8 +466,11 @@ export async function cloneTermAction(fd: FormData) {
   const slug = termSlug(data.quarter, data.year);
   if (await prisma.term.findUnique({ where: { slug } })) back(from, { error: `${termName(data)} already exists.` });
   const copyResources = bool(fd, "copyResources");
-  const offset = daysBetween(source.startDate, data.startDate);
-  const shift = (d: Date | null) => (d ? addDays(d, offset) : null);
+  // Shift dates onto the new calendar. A new term with no calendar gets no dates; a source with
+  // no calendar has nothing to shift from, so its (normally empty) dates are kept as they are.
+  const newStart = data.startDate;
+  const offset = source.startDate && newStart ? daysBetween(source.startDate, newStart) : 0;
+  const shift = (d: Date | null) => (!newStart ? null : d ? addDays(d, offset) : null);
 
   const term = await prisma.term.create({
     data: {

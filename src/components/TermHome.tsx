@@ -2,20 +2,19 @@ import Link from "next/link";
 import type { Term } from "@prisma/client";
 import { COURSE, FEATURES } from "@/lib/constants";
 import { formatDateTime, formatLongDate, formatDate } from "@/lib/dates";
-import { currentWeek, instructorNames, parseInstructors, termName, totalWeeks, weekLabel } from "@/lib/terms";
-import { getAnnouncements, getItems, getRecentItems, getWeeks, viewer } from "@/lib/queries";
+import { currentWeek, hasCalendar, instructorNames, parseInstructors, termName, totalWeeks, weekLabel } from "@/lib/terms";
+import { getAnnouncements, getItems, getWeeks } from "@/lib/queries";
 import { itemHref } from "@/lib/links";
 import { hasRecording, isNew } from "@/lib/access";
-import { ItemCard, itemHeading } from "./ItemCard";
+import { itemHeading } from "./ItemCard";
 import { DraftBadge, NewBadge, PlaceholderBadge } from "./badges";
-import { IconBook, IconCalendar, IconClipboard, IconExternal, IconMegaphone, IconSparkle, IconUsers, IconWave, IconClock } from "./icons";
+import { IconBook, IconCalendar, IconClipboard, IconExternal, IconMegaphone, IconUsers, IconWave, IconClock } from "./icons";
 import { EmptyState } from "./SiteShell";
+import { InstructorLinks } from "./InstructorLinks";
 
 export async function TermHome({ term }: { term: Term }) {
-  const [{ isStaff }, announcements, recent, all, weeks] = await Promise.all([
-    viewer(),
+  const [announcements, all, weeks] = await Promise.all([
     FEATURES.announcements ? getAnnouncements(term.id) : Promise.resolve([]),
-    getRecentItems(term.id, 6),
     getItems(term.id),
     getWeeks(term.id),
   ]);
@@ -48,7 +47,7 @@ export async function TermHome({ term }: { term: Term }) {
           <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">{COURSE.name}</h1>
           {instructors.length > 0 && (
             <p className="mt-2 text-lg text-white">
-              Taught by <span className="font-semibold text-ucla-gold">{instructors.join(", ")}</span>
+              Taught by <span className="font-semibold text-ucla-gold"><InstructorLinks instructors={term.instructors} className="underline decoration-ucla-gold/50 underline-offset-4 hover:decoration-ucla-gold" /></span>
             </p>
           )}
           {term.overview && <p className="mt-3 max-w-2xl text-base leading-relaxed text-white/90">{term.overview}</p>}
@@ -56,9 +55,11 @@ export async function TermHome({ term }: { term: Term }) {
             <Link href={`${base}/lectures`} className="btn-gold">
               <IconBook size={16} /> Lectures
             </Link>
-            <Link href={`${base}/schedule`} className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
-              <IconCalendar size={16} /> Course calendar
-            </Link>
+            {hasCalendar(term) && (
+              <Link href={`${base}/schedule`} className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
+                <IconCalendar size={16} /> Course calendar
+              </Link>
+            )}
             <a href={term.bruinLearnUrl} target="_blank" rel="noopener noreferrer" className="btn border border-white/30 bg-white/10 text-white hover:bg-white/20">
               Bruin Learn <IconExternal size={14} />
               <span className="sr-only">(opens in a new tab)</span>
@@ -134,21 +135,6 @@ export async function TermHome({ term }: { term: Term }) {
 
           )}
 
-          {/* Recently uploaded */}
-          <section aria-labelledby="recent">
-            <h2 id="recent" className="mb-3 flex items-center gap-2 text-lg font-bold text-ucla-darkestblue">
-              <IconSparkle size={20} className="text-ucla-blue" /> Recently uploaded
-            </h2>
-            {recent.length ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {recent.map((i) => (
-                  <ItemCard key={i.id} item={i} termSlug={term.slug} numWeeks={term.numWeeks} staff={isStaff} showKind showWeek />
-                ))}
-              </div>
-            ) : (
-              <EmptyState title="No materials posted yet">Lecture slides and recordings will appear here as they are uploaded.</EmptyState>
-            )}
-          </section>
         </div>
 
         <aside className="space-y-6" aria-label="Course information">
@@ -192,7 +178,7 @@ export async function TermHome({ term }: { term: Term }) {
             <ul className="mt-3 grid grid-cols-2 gap-2 text-sm">
               {[
                 { href: `${base}/lectures`, label: "Lectures", Icon: IconBook },
-                { href: `${base}/schedule`, label: "Calendar", Icon: IconCalendar },
+                ...(hasCalendar(term) ? [{ href: `${base}/schedule`, label: "Calendar", Icon: IconCalendar }] : []),
               ].map(({ href, label, Icon }) => (
                 <li key={href}>
                   <Link href={href} className="flex flex-col items-start gap-1 rounded-lg border border-slate-200 p-3 font-medium text-slate-800 hover:border-ucla-blue hover:bg-ucla-lighterblue">
@@ -215,7 +201,14 @@ export async function TermHome({ term }: { term: Term }) {
                 <ul className="mt-3 space-y-2 text-sm">
                   {staffList.map((s) => (
                     <li key={s.name + s.email}>
-                      <span className="font-medium text-slate-900">{s.name}</span>
+                      {s.url ? (
+                        <a href={s.url} target="_blank" rel="noopener noreferrer" className="font-medium text-slate-900 underline decoration-slate-300 underline-offset-2 hover:text-ucla-blue hover:decoration-ucla-blue">
+                          {s.name}
+                          <span className="sr-only"> (profile, opens in a new tab)</span>
+                        </a>
+                      ) : (
+                        <span className="font-medium text-slate-900">{s.name}</span>
+                      )}
                       {s.role && <span className="text-slate-500"> · {s.role}</span>}
                       {s.email && (
                         <a href={`mailto:${s.email}`} className="block text-ucla-blue hover:underline">

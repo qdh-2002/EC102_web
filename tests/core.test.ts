@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseCampusDateTime, toCampusInput } from "../src/lib/dates";
-import { coverage, currentWeek, weekForDate, termSlug, compareTermsDesc, instructorNames } from "../src/lib/terms";
+import { coverage, currentWeek, hasCalendar, weekForDate, weekStart, termSlug, compareTermsDesc, instructorList, instructorNames } from "../src/lib/terms";
 import { toEmbed } from "../src/lib/embed";
 import { resourceState, canDownloadPublicly, isNew } from "../src/lib/access";
 
@@ -20,6 +20,15 @@ test("week math", () => {
   assert.equal(weekForDate(t, parseCampusDateTime("2027-01-20")!), null);
 });
 
+test("terms with no calendar have no current week or week dates", () => {
+  const t = { startDate: null, numWeeks: 10 };
+  assert.equal(hasCalendar(t), false);
+  assert.equal(currentWeek(t, parseCampusDateTime("2025-10-15")!), 0);
+  assert.equal(weekForDate(t, parseCampusDateTime("2025-10-15")!), null);
+  assert.equal(weekStart(t, 3), null);
+  assert.equal(hasCalendar({ startDate: parseCampusDateTime("2026-09-28")! }), true);
+});
+
 test("coverage by campus day", () => {
   const now = parseCampusDateTime("2026-11-10T20:00")!; // after 4pm PT = next UTC day
   assert.equal(coverage(parseCampusDateTime("2026-11-05")!, now), "covered");
@@ -32,6 +41,10 @@ test("terms sort newest first and slugs", () => {
   const sorted = [{ quarter: "SPRING", year: 2026 }, { quarter: "FALL", year: 2026 }, { quarter: "WINTER", year: 2027 }].sort(compareTermsDesc);
   assert.deepEqual(sorted.map((t) => termSlug(t.quarter, t.year)), ["winter-2027", "fall-2026", "spring-2026"]);
   assert.deepEqual(instructorNames("Prof. Achuta Kadambi | | Instructor\nJim | j@x | Teaching Assistant"), ["Prof. Achuta Kadambi"]);
+  assert.deepEqual(instructorList("Prof. A | | Instructor | https://x.edu/a\nProf. B | | Instructor | javascript:alert(1)"), [
+    { name: "Prof. A", url: "https://x.edu/a" },
+    { name: "Prof. B", url: "" },
+  ]);
 });
 
 test("embeds", () => {

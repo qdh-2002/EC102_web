@@ -63,16 +63,6 @@ export async function getItem(termId: string, id: string) {
   return prisma.item.findFirst({ where: { id, termId, ...itemWhere(isStaff) }, include: itemInclude });
 }
 
-export async function getRecentItems(termId: string, take = 6) {
-  const { isStaff } = await viewer();
-  return prisma.item.findMany({
-    where: { termId, ...itemWhere(isStaff), publishedAt: { not: null } },
-    include: itemInclude,
-    orderBy: { publishedAt: "desc" },
-    take,
-  });
-}
-
 export async function getAnnouncements(termId: string, take = 5) {
   const { isStaff } = await viewer();
   return prisma.announcement.findMany({
